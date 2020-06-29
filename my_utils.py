@@ -26,7 +26,7 @@ class ddict(dict):
         dict_list[-1].__setitem__(key_list[-1], value)
 
 
-def df_to_json(df: pandas.DataFrame, index, file=None, **kwargs):
+def df_to_ddict(df: pandas.DataFrame, index):
     if not isinstance(index, list):
         index = [index]
     mindex = pandas.MultiIndex.from_frame(df[index])
@@ -35,6 +35,11 @@ def df_to_json(df: pandas.DataFrame, index, file=None, **kwargs):
     d = ddict()
     for k, v in df.to_dict('index').items():
         d[list(k)] = v
+    return d
+
+
+def df_to_json(df: pandas.DataFrame, index, file=None, **kwargs):
+    d = df_to_ddict(df, index)
     if file is None:
         return json.dumps(d, **kwargs)
     else:
