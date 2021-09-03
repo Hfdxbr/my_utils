@@ -41,16 +41,21 @@ import re
 import sys, os
 from report_classes import Job, Loadcase
 from datetime import datetime as dt
+from pathlib import Path
 
+import logging
+
+logging.basicConfig()
+logger = logging.getLogger('JobProcessor')
+logger.setLevel(logging.INFO)
 
 # =============================================================================
 # Введите путь и имя файла с исходными данными
 # =============================================================================
-dest = r'D:\Program Files\WPy\_py_projects\__work_scripts\report_reader\check_data'
-file = r'patran_XXX.rpt'
+dest = Path(r'D:\Program Files\WPy\_py_projects\__work_scripts\report_reader\check_data\patran_XXX.rpt')
 
 if len(sys.argv) > 1:
-    dest, file = os.path.split(sys.argv[1])
+    dest = Path(sys.argv[1])
     print('\n')
 # =============================================================================
 
@@ -187,18 +192,17 @@ def read_input_data(dest, file):
     return jobs
 
 
-print(f'Чтение файла конфигурации вывода config.txt...')    
-path = f'{dest}\config.txt'
-print(f"{path}")
+path = dest_file.parent / 'config.txt'
+logger.info(f'Чтение файла конфигурации вывода {path}...')    
 config_data = read_config(path)
-print(f'Чтение входных данных')
-jobs = read_input_data(dest, file)
+logger.info(f'Чтение входных данных')
+jobs = read_input_data(dest_file.parent, dest_file.name)
 
-with open (dest + '\\' + 'output_' + current_date + '.txt', 'w') as fout:
-    toprint = ''
-    for j in jobs:
-        print(f"Обработка {j.name}\n")
-        toprint += j.printout(config_data)
-    print(toprint, file = fout)
-    print(f'\nФайл output_{current_date}.txt сохранен')
-    input('Press Enter to Exit')
+out_file = dest.parent / f'output_{current_date}.txt'
+out_lines = []
+for j in jobs:
+    logger.info(f'Обработка {j.name}\n')
+    out_lines.append(j.printout(config_data))
+out_file.write_text(''.join(out_lines))
+logger.info(f'\nФайл {out_file} сохранен')
+input('Press Enter to Exit')
