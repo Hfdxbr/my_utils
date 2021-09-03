@@ -32,11 +32,7 @@ class Job():
     
     @property
     def __max_loads_check(self):
-        for i in self.j_max_loads:
-            if i == None:
-                return False
-        else:
-            return True
+        return all(self.j_max_loads)
 
     @property
     def all_elements(self):
